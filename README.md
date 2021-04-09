@@ -1,2 +1,2 @@
-# server-notes
-Notes on my research for setting up and securing remote serves can be found in the wiki. 
+# linux-notes
+Notes on my linux research including set up and securing remote serves and Arch installation. Notes are in the wiki.
