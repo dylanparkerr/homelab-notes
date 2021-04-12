@@ -1,0 +1,117 @@
+#!/bin/bash
+#Adi Kremo
+#v0.0.1
+######################variables###############################
+echo -e "The directory for the appimage and the appimage will be placed on your desktop"
+echo -e "What is the name of the app you would like to make an appimage?"
+read app
+echo -e "What is the name of the main executible or command?"
+read exe
+echo -e "Is this a single GUI application, a command line based one,  or a suite of applications? 1 for single, 2 for cli, or 3 for suite"
+read type
+while [ $type -ne 1 ] || [ $type -ne 1 ] || [ $type -ne 1 ]; do
+  echo -e "Invalid input! Please select 1 for single, 2 for cli, or 3 for suite "
+  read type
+done
+if [ $type -eq 1 ]; then
+  echo "You have selected single GUI application"
+fi
+if [ $type -eq 2 ]; then
+  echo "You have selected single GUI application"
+fi
+if [ $type -eq 3 ]; then
+  echo "You have selected single GUI application"
+fi
+echo "What is the directory/install location of the app?"
+read location
+echo  ""
+appdir= ${app}.AppDir
+cd ~/Desktop/
+wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+
+######################functions###############################
+function makedir() {
+  mkdir -p ${appdir}/usr/bin
+
+  mkdir -p ${appdir}/usr/lib
+}
+
+function makeMainFiles() {
+  touch ${appdir}/${app}.png
+  touch ${appdir}/${app}.desktop
+  cat ${appdir}/${app}.desktop << EOF
+[Desktop Entry]
+Name=$app
+Exec$app
+Icon=$app
+Type=Application
+Categories=Science;
+Comment=NA
+EOF
+}
+function moveInstallLocation {
+  cp -r $location ${appdir}/usr/bin
+}
+
+function simpleAppRun {
+  touch ${appdir}/AppRun
+cat ${appdir}/AppRun << EOF
+#!/bin/sh
+DIR="$(dirname "$(readlink -f "$0")")"
+cd "$DIR"
+usr/bin/${exe}
+EOF
+}
+
+function cliAppRun {
+  touch ${appdir}/AppRun
+cat ${appdir}/AppRun << EOF
+#!/bin/sh
+DIR="$(dirname "$(readlink -f "$0")")"
+cd "$DIR"
+if [ $1 ]; then
+usr/bin/$exe $1 $2 $3 $4 $5 $6 $7 $8 $9 $10;
+else
+usr/bin/$exe
+echo "Please enter arguments along with program call such as --help or other functions."
+fi
+EOF
+}
+
+function suiteAppRun {
+  touch ${appdir}/AppRun
+cat ${appdir}/AppRun << EOF
+#!/bin/sh
+DIR="$(dirname "$(readlink -f "$0")")"
+cd "$DIR"
+if [ $1 ]; then
+usr/bin/./$1 $2 $3 $4 $5;
+else
+echo "Exec List: "
+ls usr/bin/;
+echo "Which one do you want to run:";
+read var;
+usr/bin/./$var;
+fi
+EOF
+}
+
+function package {
+  chmod -R 777 ${appdir}
+  ARCH=x86_64 ./appimagetool-x86_64.AppImage ${appdir}/ ${app}.appimage
+  rm appimagetool-x86_64.AppImage*
+}
+######################calls###############################
+makedir
+makeMainFiles
+moveInstallLocation
+if [ $type -eq 1 ]; then
+  simpleAppRun
+else
+  if [ $type -eq 2 ]; then
+    cliAppRun
+else
+  if [ $type -eq 3 ]; then
+    suiteAppRun
+fi
+package
